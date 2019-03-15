@@ -6,7 +6,7 @@ addons:
         organization: "hildi-can"
 
 script:
-    - "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent verify sonar:sonar jacoco:report -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=io.github.hildi-can:serialization"
+    - "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent verify sonar:sonar jacoco:report"
 
 cache:
     directories:
