@@ -6,8 +6,7 @@ addons:
         organization: "hildi-can"
 
 script:
-    - "mvn cobertura:cobertura"
-    - "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar"
+    - "mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent verify sonar:sonar"
 
 cache:
     directories:
