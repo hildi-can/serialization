@@ -24,7 +24,7 @@ hs_err_pid*
 
 # idea
 .idea
-serialization.iml
+*.iml
 
 # mvn
 target
