@@ -10,21 +10,16 @@ import java.io.*;
 public class StandardJavaSerializationService implements SerializationService {
 
     @Override
-    public User deserialize(File file) {
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))){
-            return (User) in.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error: " + e.getMessage());
+    public void serialize(User user, File file) throws IOException {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))){
+            out.writeObject(user);
         }
-        return null;
     }
 
     @Override
-    public void serialize(User user, File file) {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))){
-            out.writeObject(user);
-        } catch (IOException e) {
-            System.err.println("Error:" + e.getMessage());
+    public User deserialize(File file) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+            return (User) in.readObject();
         }
     }
 }

@@ -1,10 +1,11 @@
 package io.github.hildi.can.model;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
-public class User {
+public class User implements Serializable {
 
     private final Long id;
     private final String nickName;

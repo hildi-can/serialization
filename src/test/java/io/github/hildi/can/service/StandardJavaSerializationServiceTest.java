@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 class StandardJavaSerializationServiceTest {
 
     @Test
-    void deserialize() {
+    void serialize() {
     }
 
     @Test
-    void serialize() {
+    void deserialize() {
     }
 }
