@@ -26,7 +26,7 @@ class StandardJavaSerializationServiceTest {
     void setUp() throws IOException {
         service = new StandardJavaSerializationService();
         file = File.createTempFile("temp","txt");
-        user = new User(111L, "Valera");
+        user = new User(1L, "Lord");
     }
 
     @Test
