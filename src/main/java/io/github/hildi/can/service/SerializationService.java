@@ -14,7 +14,7 @@ public interface SerializationService {
      * @param file - the file, to read user data from
      * @return instance of {@link User} class, never null
      */
-    User deserialize(File file) throws IOException, ClassNotFoundException;
+    User deserialize(File file);
 
     /**
      * Stores {@link User} instance's data to the file, described by the file argument.
@@ -22,6 +22,6 @@ public interface SerializationService {
      * @param user - user to store
      * @param file - file, where data must be stored
      */
-    void serialize(User user, File file) throws IOException;
+    void serialize(User user, File file);
 
 }
