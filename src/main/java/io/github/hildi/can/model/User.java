@@ -8,6 +8,8 @@ import java.util.Objects;
 
 public class User implements Serializable {
 
+    private static final long serialVersionUID = 2185813755505459630L;
+
     private final Long id;
     private final String nickName;
     private String email;

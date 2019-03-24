@@ -3,7 +3,6 @@ package io.github.hildi.can.service;
 import io.github.hildi.can.model.User;
 
 import java.io.File;
-import java.io.IOException;
 
 public interface SerializationService {
 
