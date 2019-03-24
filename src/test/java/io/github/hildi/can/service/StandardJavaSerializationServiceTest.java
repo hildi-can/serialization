@@ -23,11 +23,13 @@ class StandardJavaSerializationServiceTest {
     private File file;
     private StandardJavaSerializationService service;
     private User user;
+    private File mock;
 
     @BeforeEach
     void setUp() throws IOException {
         service = new StandardJavaSerializationService();
         file = File.createTempFile("temp","txt");
+        mock = mock(File.class);
         user = new User(1L, "Lord");
     }
 
@@ -50,7 +52,6 @@ class StandardJavaSerializationServiceTest {
 
     @Test
     void shouldThrowFileIsNotExistsExceptionIfFileIsNotExists() {
-        File mock = mock(File.class);
         Mockito.when(mock.exists()).thenReturn(false);
 
         assertThrows(FileIsNotExistsException.class, () -> {
@@ -60,7 +61,6 @@ class StandardJavaSerializationServiceTest {
 
     @Test
     void shouldThrowNotWritableFileExceptionIfAppIsAllowedToWriteToTheFile() {
-        File mock = mock(File.class);
         Mockito.when(mock.exists()).thenReturn(true);
         Mockito.when(mock.canWrite()).thenReturn(false);
 
