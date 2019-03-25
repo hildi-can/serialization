@@ -1,7 +1,7 @@
 package io.github.hildi.can.service;
 
-import io.github.hildi.can.exceptions.DeserializeException;
-import io.github.hildi.can.exceptions.FileDoesNotExistsException;
+import io.github.hildi.can.exceptions.SerializationException;
+import io.github.hildi.can.exceptions.FileDoesNotExistException;
 import io.github.hildi.can.exceptions.NotWritableFileException;
 import io.github.hildi.can.model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,23 +38,21 @@ class StandardJavaSerializationServiceTest {
         service.serialize(user, file);
         User deserialize = service.deserialize(file);
 
-        User expected = user;
-
-        assertEquals(expected, deserialize);
+        assertEquals(user, deserialize);
     }
 
     @Test
-    void shouldThrowDeserializeExceptionWhenFileDoesNotExists() {
-        assertThrows(DeserializeException.class, () -> {
-            service.deserialize(file);
+    void shouldThrowDeserializeExceptionWhenFileDoesNotExist() {
+        assertThrows(SerializationException.class, () -> {
+            service.deserialize(mock);
         });
     }
 
     @Test
-    void shouldThrowFileIsNotExistsExceptionWhenFileDoesNotExists() {
+    void shouldThrowFileIsNotExistsExceptionWhenFileDoesNotExist() {
         Mockito.when(mock.exists()).thenReturn(false);
 
-        assertThrows(FileDoesNotExistsException.class, () -> {
+        assertThrows(FileDoesNotExistException.class, () -> {
             service.serialize(user, mock);
         });
     }
