@@ -1,7 +1,7 @@
 package io.github.hildi.can.service;
 
 import io.github.hildi.can.exceptions.DeserializeException;
-import io.github.hildi.can.exceptions.FileIsNotExistsException;
+import io.github.hildi.can.exceptions.FileDoesNotExistsException;
 import io.github.hildi.can.exceptions.NotWritableFileException;
 import io.github.hildi.can.model.User;
 
@@ -12,23 +12,19 @@ import java.io.*;
  */
 public class StandardJavaSerializationService implements SerializationService {
 
-    private User user;
-
     @Override
     public void serialize(User user, File file) {
 
         if (!file.exists()) {
-            throw new FileIsNotExistsException("We cannot write data at file. File is not exists.");
+            throw new FileDoesNotExistsException("Failed to serialize data, reason: file " + file.getName() + " doesn't exist.");
         }
-
         if (!file.canWrite()){
-            throw new NotWritableFileException("We cannot write data at file. Is not a writable");
+            throw new NotWritableFileException("Failed to serialize data, reason: " + file.getName() + " doesn't writable.");
         }
-
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
             out.writeObject(user);
         } catch (IOException e) {
-            System.out.println("We cannot write data at file. " + e.getMessage());
+            System.err.println("Failed to serialize data. " + file.getName());
         }
     }
 
@@ -37,12 +33,12 @@ public class StandardJavaSerializationService implements SerializationService {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             return (User) in.readObject();
         } catch (FileNotFoundException e) {
-            System.out.println("We cannot find a file. " + e.getMessage());
-        } catch (IOException e) {
-            System.out.println("We cannot read file data. " + e.getMessage());
+            System.err.println("Failed to deserialize data, reason: file " + file.getName() + " don't find. ");
         } catch (ClassNotFoundException e) {
-            System.out.println("We cannot find a class. " + e.getMessage());
+            System.err.println("Failed to deserialize data, reason: class don't find. " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Failed to deserialize data. " + e.getMessage());
         }
-        throw new DeserializeException("We cannot deserialize this file.");
+        throw new DeserializeException("Failed to deserialize data. File name: " + file.getName());
     }
 }
