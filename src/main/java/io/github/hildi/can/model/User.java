@@ -23,6 +23,16 @@ public class User implements Serializable {
         this.nickName = nickName;
     }
 
+    public User(Long id, String nickName, String email, FullName fullName, Collection<String> permissions, Map<String, String> attributes, Date createdAt) {
+        this.id = id;
+        this.nickName = nickName;
+        this.email = email;
+        this.fullName = fullName;
+        this.permissions = permissions;
+        this.attributes = attributes;
+        this.createdAt = createdAt;
+    }
+
     public Long getId() {
         return id;
     }
@@ -88,5 +98,17 @@ public class User implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(id, nickName, email, fullName, permissions, attributes, createdAt);
+    }
+
+    @Override
+    public String toString() {
+        return "id = " + id + "\n" +
+            "nickName = " + nickName + "\n" +
+            "email = " + email + "\n" +
+//            //     ?  "firstName = " + fullName.split("\\.") + "\n" +
+//            //     ?  "lastName = " + Solohub + "\n" +
+            "permissions = " + permissions + "\n" +
+            "attributes = " + attributes + "\n" +
+            "createdAt = " + createdAt + "\n";
     }
 }
