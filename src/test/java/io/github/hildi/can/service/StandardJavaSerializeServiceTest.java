@@ -1,6 +1,5 @@
 package io.github.hildi.can.service;
 
-import io.github.hildi.can.exceptions.SerializationException;
 import io.github.hildi.can.exceptions.FileDoesNotExistException;
 import io.github.hildi.can.exceptions.NotWritableFileException;
 import io.github.hildi.can.model.User;
@@ -18,9 +17,8 @@ import static org.mockito.Mockito.mock;
 /**
  * Created by Serhii Hildi on 15.03.19.
  */
-class StandardJavaSerializationServiceTest {
+class StandardJavaSerializeServiceTest {
 
-    private File file;
     private StandardJavaSerializationService service;
     private User user;
     private File mock;
@@ -28,24 +26,19 @@ class StandardJavaSerializationServiceTest {
     @BeforeEach
     void setUp() throws IOException {
         service = new StandardJavaSerializationService();
-        file = File.createTempFile("temp","txt");
         mock = mock(File.class);
         user = new User(1L, "Lord");
     }
 
     @Test
-    void serializedThanDeserializeInstanceShouldBeEquals() {
-        service.serialize(user, file);
-        User deserialize = service.deserialize(file);
+    void serializedThanDeserializeInstanceShouldBeEquals() throws IOException {
+        File tempFile = File.createTempFile("temp", "txt");
+        User tempUser = new User(1L, "Lord");
 
-        assertEquals(user, deserialize);
-    }
+        service.serialize(tempUser, tempFile);
+        User deserialize = service.deserialize(tempFile);
 
-    @Test
-    void shouldThrowDeserializeExceptionWhenFileDoesNotExist() {
-        assertThrows(SerializationException.class, () -> {
-            service.deserialize(mock);
-        });
+        assertEquals(tempUser, deserialize);
     }
 
     @Test
