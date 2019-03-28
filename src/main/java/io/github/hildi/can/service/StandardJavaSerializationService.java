@@ -55,7 +55,7 @@ public class StandardJavaSerializationService implements SerializationService {
         }
     }
 
-    private static void assertFileReadable(File file) {
+    static void assertFileReadable(File file) {
         if (!file.canRead()) {
             throw new NotReadableFileException("Failed to deserialize, reason: " + file.getName() + " is not readable.");
         }
@@ -68,7 +68,7 @@ public class StandardJavaSerializationService implements SerializationService {
         assertFileNotNull(file);
     }
 
-    private static void assertFileNotNull(File file) {
+    static void assertFileNotNull(File file) {
         if (file == null) {
             throw new NullFileException("Failed to serialization, reason: File is null.");
         }
