@@ -1,7 +1,7 @@
 package io.github.hildi.can.service;
 
-import io.github.hildi.can.exceptions.FileDoesNotExistException;
 import io.github.hildi.can.exceptions.NotWritableFileException;
+import io.github.hildi.can.exceptions.NullFileException;
 import io.github.hildi.can.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ class StandardJavaSerializeServiceTest {
     private File mock;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
         service = new StandardJavaSerializationService();
         mock = mock(File.class);
         user = new User(1L, "Lord");
@@ -45,7 +45,7 @@ class StandardJavaSerializeServiceTest {
     void shouldThrowFileIsNotExistsExceptionWhenFileDoesNotExist() {
         Mockito.when(mock.exists()).thenReturn(false);
 
-        assertThrows(FileDoesNotExistException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             service.serialize(user, mock);
         });
     }
@@ -57,6 +57,20 @@ class StandardJavaSerializeServiceTest {
 
         assertThrows(NotWritableFileException.class, () -> {
             service.serialize(user, mock);
+        });
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenUserIsNull() {
+        assertThrows(NullFileException.class, () -> {
+            service.serialize(null, mock);
+        });
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenFileIsNull() {
+        assertThrows(NullFileException.class, () -> {
+            service.serialize(user, null);
         });
     }
 }
