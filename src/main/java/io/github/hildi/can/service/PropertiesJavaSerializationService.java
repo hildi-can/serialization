@@ -2,7 +2,6 @@ package io.github.hildi.can.service;
 
 import io.github.hildi.can.exceptions.InvalidFileException;
 import io.github.hildi.can.model.User;
-
 import java.io.File;
 
 /**
