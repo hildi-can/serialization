@@ -1,6 +1,7 @@
 package io.github.hildi.can.service;
 
 import io.github.hildi.can.exceptions.NotReadableFileException;
+import io.github.hildi.can.exceptions.NullFileException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -42,7 +43,6 @@ class StandardJavaDeserializeServiceTest {
         });
     }
 
-    //
     @Test
     void shouldThrowNotWritableFileExceptionIfAppIsAllowedToWriteToTheFile() {
         Mockito.when(mock.exists()).thenReturn(true);
@@ -50,6 +50,13 @@ class StandardJavaDeserializeServiceTest {
 
         assertThrows(NotReadableFileException.class, () -> {
             service.deserialize(mock);
+        });
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenFileIsNull() {
+        assertThrows(NullFileException.class, () -> {
+            service.deserialize(null);
         });
     }
 }

@@ -13,9 +13,9 @@ public class StandardJavaSerializationService implements SerializationService {
     @Override
     public void serialize(User user, File file) {
 
+        assertParamNotNull(user, file);
         assertFileExist(file);
         assertFileWritable(file);
-        assertParamNotNull(user, file);
 
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
             out.writeObject(user);
@@ -29,8 +29,8 @@ public class StandardJavaSerializationService implements SerializationService {
     @Override
     public User deserialize(File file) {
 
-        assertFileReadable(file);
         assertFileNotNull(file);
+        assertFileReadable(file);
 
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             return (User) in.readObject();
@@ -45,7 +45,7 @@ public class StandardJavaSerializationService implements SerializationService {
 
     static void assertFileExist(File file) {
         if (!file.exists()) {
-            throw new FileDoesNotExistException("Failed to serialization, reason: file " + file.getName() + " doesn't exist.");
+            throw new IllegalArgumentException("Failed to serialization, reason: file " + file.getName() + " doesn't exist.");
         }
     }
 
@@ -63,7 +63,7 @@ public class StandardJavaSerializationService implements SerializationService {
 
     static void assertParamNotNull(User user, File file) {
         if (user == null) {
-            throw new NullFileException("Failed to serialization, reason: File is null.");
+            throw new NullFileException("Failed to serialization, reason: User is null.");
         }
         assertFileNotNull(file);
     }
