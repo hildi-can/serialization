@@ -1,7 +1,6 @@
 package io.github.hildi.can.service;
 
 import io.github.hildi.can.exceptions.NotWritableFileException;
-import io.github.hildi.can.exceptions.NullFileException;
 import io.github.hildi.can.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,14 +61,14 @@ class StandardJavaSerializeServiceTest {
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenUserIsNull() {
-        assertThrows(NullFileException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             service.serialize(null, mock);
         });
     }
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenFileIsNull() {
-        assertThrows(NullFileException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             service.serialize(user, null);
         });
     }

@@ -63,14 +63,14 @@ public class StandardJavaSerializationService implements SerializationService {
 
     private static void assertParamNotNull(User user, File file) {
         if (user == null) {
-            throw new NullFileException("Failed to serialization, reason: User is null.");
+            throw new IllegalArgumentException("Failed to serialization, reason: User is null.");
         }
         assertFileNotNull(file);
     }
 
     private static void assertFileNotNull(File file) {
         if (file == null) {
-            throw new NullFileException("Failed to serialization, reason: File is null.");
+            throw new IllegalArgumentException("Failed to serialization, reason: File is null.");
         }
     }
 }
