@@ -41,7 +41,7 @@ class StandardJavaSerializeServiceTest {
     }
 
     @Test
-    void shouldThrowFileIsNotExistsExceptionWhenFileDoesNotExist() {
+    void shouldThrowIllegalArgumentExceptionWhenFileDoesNotExist() {
         Mockito.when(mock.exists()).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class, () -> {
