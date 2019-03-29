@@ -25,7 +25,7 @@ class StandardJavaDeserializeServiceTest {
     }
 
     @Test
-    void shouldThrowFNotReadableFileExceptionWhenFileIsNotReadable() {
+    void shouldThrowNotReadableFileExceptionWhenFileIsNotReadable() {
         Mockito.when(mock.canRead()).thenReturn(false);
 
         assertThrows(NotReadableFileException.class, () -> {
@@ -34,18 +34,8 @@ class StandardJavaDeserializeServiceTest {
     }
 
     @Test
-    void shouldThrowFNotReadableFileExceptionWhenFileDoesNotExist() {
+    void shouldThrowNotReadableFileExceptionWhenFileDoesNotExist() {
         Mockito.when(mock.exists()).thenReturn(false);
-
-        assertThrows(NotReadableFileException.class, () -> {
-            service.deserialize(mock);
-        });
-    }
-
-    @Test
-    void shouldThrowNotWritableFileExceptionIfAppIsAllowedToWriteToTheFile() {
-        Mockito.when(mock.exists()).thenReturn(true);
-        Mockito.when(mock.canWrite()).thenReturn(false);
 
         assertThrows(NotReadableFileException.class, () -> {
             service.deserialize(mock);
