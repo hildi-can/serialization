@@ -57,7 +57,7 @@ public class StandardJavaSerializationService implements SerializationService {
 
     static void assertFileReadable(File file) {
         if (!file.canRead()) {
-            throw new NotReadableFileException("Failed to deserialize, reason: " + file.getName() + " is not readable.");
+            throw new NotReadableFileException("Failed to deserialize, reason: " + file.getName() + " is not readable or doesn't exist.");
         }
     }
 
