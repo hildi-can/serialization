@@ -4,7 +4,6 @@ import io.github.hildi.can.exceptions.NotWritableFileException;
 import io.github.hildi.can.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +11,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by Serhii Hildi on 15.03.19.
@@ -20,12 +20,12 @@ class StandardJavaSerializeServiceTest {
 
     private StandardJavaSerializationService service;
     private User user;
-    private File mock;
+    private File file;
 
     @BeforeEach
     void setUp() {
         service = new StandardJavaSerializationService();
-        mock = mock(File.class);
+        file = mock(File.class);
         user = new User(1L, "Lord");
     }
 
@@ -42,27 +42,27 @@ class StandardJavaSerializeServiceTest {
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenFileDoesNotExist() {
-        Mockito.when(mock.exists()).thenReturn(false);
+        when(file.exists()).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class, () -> {
-            service.serialize(user, mock);
+            service.serialize(user, file);
         });
     }
 
     @Test
     void shouldThrowNotWritableFileExceptionIfAppIsAllowedToWriteToTheFile() {
-        Mockito.when(mock.exists()).thenReturn(true);
-        Mockito.when(mock.canWrite()).thenReturn(false);
+        when(file.exists()).thenReturn(true);
+        when(file.canWrite()).thenReturn(false);
 
         assertThrows(NotWritableFileException.class, () -> {
-            service.serialize(user, mock);
+            service.serialize(user, file);
         });
     }
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenUserIsNull() {
         assertThrows(IllegalArgumentException.class, () -> {
-            service.serialize(null, mock);
+            service.serialize(null, file);
         });
     }
 
