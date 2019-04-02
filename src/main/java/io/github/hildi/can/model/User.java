@@ -95,8 +95,8 @@ public class User implements Serializable {
         return "id = " + id + "\n" +
             "nickName = " + nickName + "\n" +
             "email = " + email + "\n" +
-//            //     ?  "firstName = " + fullName.split("\\.") + "\n" +
-//            //     ?  "lastName = " + Solohub + "\n" +
+            "firstName = " + fullName.getFirstName() + "\n" +
+            "lastName = " + fullName.getLastName() + "\n" +
             "permissions = " + permissions + "\n" +
             "attributes = " + attributes + "\n" +
             "createdAt = " + createdAt + "\n";
