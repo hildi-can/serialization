@@ -16,29 +16,20 @@ import static org.mockito.Mockito.mock;
 class StandardJavaDeserializeServiceTest {
 
     private StandardJavaSerializationService service;
-    private File mock;
+    private File file;
 
     @BeforeEach
     void setUp() {
         service = new StandardJavaSerializationService();
-        mock = mock(File.class);
+        file = mock(File.class);
     }
 
     @Test
     void shouldThrowNotReadableFileExceptionWhenFileIsNotReadable() {
-        Mockito.when(mock.canRead()).thenReturn(false);
+        Mockito.when(file.canRead()).thenReturn(false);
 
         assertThrows(NotReadableFileException.class, () -> {
-            service.deserialize(mock);
-        });
-    }
-
-    @Test
-    void shouldThrowNotReadableFileExceptionWhenFileDoesNotExist() {
-        Mockito.when(mock.exists()).thenReturn(false);
-
-        assertThrows(NotReadableFileException.class, () -> {
-            service.deserialize(mock);
+            service.deserialize(file);
         });
     }
 

@@ -45,13 +45,13 @@ public class StandardJavaSerializationService implements SerializationService {
 
     private static void assertFileExist(File file) {
         if (!file.exists()) {
-            throw new IllegalArgumentException("Failed to serialization, reason: file " + file.getName() + " doesn't exist.");
+            throw new IllegalArgumentException("Failed to serialize, reason: file " + file.getName() + " doesn't exist.");
         }
     }
 
     private static void assertFileWritable(File file) {
         if (!file.canWrite()) {
-            throw new NotWritableFileException("Failed to serialization, reason: " + file.getName() + " is not writable.");
+            throw new NotWritableFileException("Failed to serialize, reason: " + file.getName() + " is not writable.");
         }
     }
 
@@ -63,14 +63,14 @@ public class StandardJavaSerializationService implements SerializationService {
 
     private static void assertParamNotNull(User user, File file) {
         if (user == null) {
-            throw new IllegalArgumentException("Failed to serialization, reason: User is null.");
+            throw new IllegalArgumentException("Failed to serialize, reason: User is null.");
         }
         assertFileNotNull(file);
     }
 
     private static void assertFileNotNull(File file) {
         if (file == null) {
-            throw new IllegalArgumentException("Failed to serialization, reason: File is null.");
+            throw new IllegalArgumentException("Failed to serialize, reason: File is null.");
         }
     }
 }
