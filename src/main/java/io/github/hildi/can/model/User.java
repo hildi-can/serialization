@@ -1,7 +1,10 @@
 package io.github.hildi.can.model;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
 
 public class User implements Serializable {
 
@@ -85,17 +88,4 @@ public class User implements Serializable {
     public int hashCode() {
         return Objects.hash(id, nickName, email, permissions, attributes, createdAt);
     }
-
-//    @Override
-//    public String toString() {
-//        return "id = " + id + "\n" +
-//            "nickName = " + nickName + "\n" +
-//            "email = " + email + "\n" +
-//            "permissions = " + permissions + "\n" +
-//            "attributes = " + attributes + "\n" +
-//            "createdAt = " + createdAt + "\n" +
-//            fullName + "\n";
-////            "firstName = " + fullName.getFirstName() + "\n" +
-////            "lastName = " + fullName.getLastName() + "\n";
-//    }
 }

@@ -20,7 +20,6 @@ public class JavaSerializationService implements SerializationService{
 
     private User user;
     private FullName fullName;
-
     private long userId;
     private String userNickName;
     private String firstName;
@@ -32,16 +31,10 @@ public class JavaSerializationService implements SerializationService{
 
     @Override
     public void serialize(User user, File file) {
-
         assertParamNotNull(user, file);
         assertFileExist(file);
         assertFileWritable(file);
-
         try (FileWriter writer = new FileWriter(file)) {
-//            setUserParameters(user.getId(), user.getNickName(),
-//                                    user.getEmail(), user.getPermissions(),
-//                                    user.getAttributes(), user.getCreatedAt());
-//            writer.write(String.valueOf(user));
             writer.write(setUserParametersToFile(user));
         } catch (IOException e) {
             throw new SerializationException("Failed to serialize data. " + file.getName(), e);
@@ -50,11 +43,9 @@ public class JavaSerializationService implements SerializationService{
 
     @Override
     public User deserialize(File file) {
-
         assertFileNotNull(file);
         assertFileReadable(file);
         assertFileExtensionIsCorrect(file);
-
         try (Scanner scanner = new Scanner(file)){
             getAndAssignParametersFromFile(scanner);
             setUserParameters(userId, userNickName, userEmail, userPermissions, userAttributes, createdAt);
@@ -215,45 +206,34 @@ public class JavaSerializationService implements SerializationService{
         }
     }
 
-//    public static void main(String[] args) {
-//        File file = new File("User.properties");
-////        new JavaSerializationService().deserialize(file);
-//        new JavaSerializationService().serialize(
-//            new User(
-//                1L, "nickName"
-//            ),
-//            file
-//        );
-//    }
-
-    static void assertFileExist(File file) {
-        if (!file.exists()) {
-            throw new IllegalArgumentException("Failed to serialize, reason: file " + file.getName() + " doesn't exist.");
-        }
-    }
-
-    static void assertFileWritable(File file) {
+    private static void assertFileWritable(File file) {
         if (!file.canWrite()) {
             throw new NotWritableFileException("Failed to serialize, reason: " + file.getName() + " is not writable.");
         }
     }
 
-    static void assertFileReadable(File file) {
+    private static void assertFileReadable(File file) {
         if (!file.canRead()) {
             throw new NotReadableFileException("Failed to deserialize, reason: " + file.getName() + " is not readable or doesn't exist.");
         }
     }
 
-    static void assertParamNotNull(User user, File file) {
+    private static void assertParamNotNull(User user, File file) {
         if (user == null) {
             throw new IllegalArgumentException("Failed to serialize, reason: User is null.");
         }
         assertFileNotNull(file);
     }
 
-    static void assertFileNotNull(File file) {
+    private static void assertFileNotNull(File file) {
         if (file == null) {
             throw new IllegalArgumentException("Failed to serialize, reason: File is null.");
+        }
+    }
+
+    private static void assertFileExist(File file) {
+        if (!file.exists()) {
+            throw new IllegalArgumentException("Failed to serialize, reason: file " + file.getName() + " doesn't exist.");
         }
     }
 }
