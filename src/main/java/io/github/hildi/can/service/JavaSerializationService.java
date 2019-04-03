@@ -1,6 +1,8 @@
 package io.github.hildi.can.service;
 
 import io.github.hildi.can.exceptions.InvalidFileException;
+import io.github.hildi.can.exceptions.NotReadableFileException;
+import io.github.hildi.can.exceptions.NotWritableFileException;
 import io.github.hildi.can.exceptions.SerializationException;
 import io.github.hildi.can.model.FullName;
 import io.github.hildi.can.model.User;
@@ -10,8 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
-
-import static io.github.hildi.can.service.StandardJavaSerializationService.*;
 
 /**
  * Created by Serhii Hildi on 26.03.19.
@@ -225,4 +225,35 @@ public class JavaSerializationService implements SerializationService{
 //            file
 //        );
 //    }
+
+    static void assertFileExist(File file) {
+        if (!file.exists()) {
+            throw new IllegalArgumentException("Failed to serialize, reason: file " + file.getName() + " doesn't exist.");
+        }
+    }
+
+    static void assertFileWritable(File file) {
+        if (!file.canWrite()) {
+            throw new NotWritableFileException("Failed to serialize, reason: " + file.getName() + " is not writable.");
+        }
+    }
+
+    static void assertFileReadable(File file) {
+        if (!file.canRead()) {
+            throw new NotReadableFileException("Failed to deserialize, reason: " + file.getName() + " is not readable or doesn't exist.");
+        }
+    }
+
+    static void assertParamNotNull(User user, File file) {
+        if (user == null) {
+            throw new IllegalArgumentException("Failed to serialize, reason: User is null.");
+        }
+        assertFileNotNull(file);
+    }
+
+    static void assertFileNotNull(File file) {
+        if (file == null) {
+            throw new IllegalArgumentException("Failed to serialize, reason: File is null.");
+        }
+    }
 }
