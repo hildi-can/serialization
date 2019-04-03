@@ -3,7 +3,6 @@ package io.github.hildi.can.service;
 import io.github.hildi.can.model.User;
 
 import java.io.File;
-import java.net.URI;
 
 public interface SerializationService {
 
@@ -20,8 +19,8 @@ public interface SerializationService {
      * Stores {@link User} instance's data to the file, described by the file argument.
      *
      * @param user - user to store
-     * @param uri - file, where data must be stored
+     * @param file - file, where data must be stored
      */
-    void serialize(User user, URI uri);
+    void serialize(User user, File file);
 
 }
