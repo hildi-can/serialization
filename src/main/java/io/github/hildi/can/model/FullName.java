@@ -17,4 +17,10 @@ public class FullName {
     public String getLastName() {
         return lastName;
     }
+
+    @Override
+    public String toString() {
+        return "firstName = " + firstName + "\n" +
+            "lastName = " + lastName + '\n';
+    }
 }

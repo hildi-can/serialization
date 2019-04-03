@@ -7,10 +7,11 @@ import io.github.hildi.can.model.User;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
-import static io.github.hildi.can.service.StandardJavaSerializationService.assertFileNotNull;
-import static io.github.hildi.can.service.StandardJavaSerializationService.assertFileReadable;
+import static io.github.hildi.can.service.StandardJavaSerializationService.*;
 
 /**
  * Created by Serhii Hildi on 26.03.19.
@@ -31,24 +32,48 @@ public class JavaSerializationService implements SerializationService{
 
     @Override
     public void serialize(User user, File file) {
-        // TODO
-//      assertFileExtensionIsCorrect(file);
-//      StandardJavaSerializationService service = new StandardJavaSerializationService();
-//      service.serialize(user, file);
+
+        assertParamNotNull(user, file);
+        assertFileExist(file);
+        assertFileWritable(file);
+
+        try (FileWriter writer = new FileWriter(file)) {
+//            setUserParameters(user.getId(), user.getNickName(),
+//                                    user.getEmail(), user.getPermissions(),
+//                                    user.getAttributes(), user.getCreatedAt());
+//            writer.write(String.valueOf(user));
+            writer.write(setUserParametersToFile(user));
+        } catch (IOException e) {
+            throw new SerializationException("Failed to serialize data. " + file.getName(), e);
+        }
     }
 
     @Override
     public User deserialize(File file) {
+
         assertFileNotNull(file);
         assertFileReadable(file);
         assertFileExtensionIsCorrect(file);
+
         try (Scanner scanner = new Scanner(file)){
             getAndAssignParametersFromFile(scanner);
-            setParametersForNewUser(userId, userNickName, userEmail, userPermissions, userAttributes, createdAt);
+            setUserParameters(userId, userNickName, userEmail, userPermissions, userAttributes, createdAt);
         } catch (FileNotFoundException e) {
-            throw new SerializationException("Failed to deserialize data, reason: file " + file.getName() + " is not found. ", e);
+            throw new SerializationException("Failed to deserialize data, reason: file " + file.getName() +
+                " is not found. ", e);
         }
         return user;
+    }
+
+    private String setUserParametersToFile(User user) {
+        return "id = " + user.getId() + "\n" +
+            "nickName = " + user.getNickName() + "\n" +
+//            "firstName = " + fullName.getFirstName() + "\n" +
+//            "lastName = " + fullName.getLastName() + "\n" +
+            "email = " + user.getEmail() + "\n" +
+            "permissions = " + user.getPermissions() + "\n" +
+            "attributes = " + user.getAttributes() + "\n" +
+            "createdAt = " + user.getCreatedAt() + "\n";
     }
 
     private void getAndAssignParametersFromFile(Scanner scanner) {
@@ -57,31 +82,15 @@ public class JavaSerializationService implements SerializationService{
         }
     }
 
-    private void setParametersForNewUser(long userId, String userNickName, String userEmail, Collection<String> userPermissions,
-                                         Map<String, String> userAttributes, Date createdAt) {
-
+    private void setUserParameters(long userId, String userNickName, String userEmail,
+                                   Collection<String> userPermissions,
+                                   Map<String, String> userAttributes, Date createdAt) {
         setIdAndNickNameParameters(userId, userNickName);
-        //print it
-//        System.out.println();
-//        System.out.println("userId = " + user.getId());
-//        System.out.println("userNickName = " + user.getNickName());
-        // end print it
         setFullName(firstName, lastName);
-        //print it
-//        System.out.println("fullName = " + fullName);
-//        System.out.println("userName = " + fullName.getFirstName());
-//        System.out.println("userLastName = " + fullName.getLastName());
-        // end print it
         setUserEmail(userEmail);
         setUserPermissions(userPermissions);
         setUserAttributes(userAttributes);
         setUserCreatedData(createdAt);
-    }
-
-    private void setFullName(String firstName, String lastName) {
-        if (firstName != null && lastName != null) {
-            fullName = new FullName(firstName, lastName);
-        }
     }
 
     private void setIdAndNickNameParameters(long userId, String userNickName) {
@@ -90,28 +99,26 @@ public class JavaSerializationService implements SerializationService{
         }
     }
 
+    private void setFullName(String firstName, String lastName) {
+        if (firstName != null && lastName != null) {
+            fullName = new FullName(firstName, lastName);
+        }
+    }
+
     private void setUserEmail(String userEmail) {
         user.setEmail(userEmail);
-        // TODO
-//        System.out.println("userEmail = " + userEmail);
     }
 
     private void setUserPermissions(Collection<String> userPermissions) {
         user.setPermissions(userPermissions);
-        // TODO
-//        System.out.println("userPermissions = " + userPermissions);
     }
 
     private void setUserAttributes(Map<String, String> userAttributes) {
         user.setAttributes(userAttributes);
-        // TODO
-//        System.out.println("userAttributes = " + userAttributes);
     }
 
     private void setUserCreatedData(Date createdAt) {
         user.setCreatedAt(createdAt);
-        // TODO
-//        System.out.println("createdAt = " + createdAt);
     }
 
     private void getUserPropertiesFromFile(Scanner scanner) {
@@ -131,40 +138,30 @@ public class JavaSerializationService implements SerializationService{
     private void getUserId(String param, String[] line) {
         if (param.equals("id".toLowerCase().trim())) {
             userId = (long) Integer.parseInt(line[1]);
-            // TODO
-//            System.out.println("id = " + userId);
         }
     }
 
     private void getUserNickName(String param, String[] line) {
         if (param.equals("nickName".toLowerCase().trim())) {
             userNickName = line[1];
-            // TODO
-//            System.out.println("nickname = " + userNickName);
         }
     }
 
     private void getUserFirstName(String param, String[] line) {
         if (param.equals("firstName".toLowerCase().trim())) {
             firstName = line[1].trim();
-            // TODO
-//            System.out.println("firstName = " + firstName);
         }
     }
 
     private void getUserLastName(String param, String[] line) {
         if (param.equals("lastName".toLowerCase().trim())) {
             lastName = line[1].trim();
-            // TODO
-//            System.out.println("lastName = " + lastName);
         }
     }
 
     private void getUserEmail(String param, String[] line) {
         if (param.equals("email".toLowerCase().trim())) {
             userEmail = line[1].toLowerCase().trim();
-            // TODO
-//            System.out.println("email = " + userEmail);
         }
     }
 
@@ -173,8 +170,6 @@ public class JavaSerializationService implements SerializationService{
             String trimLine = line[1].trim();
             String[] permissionsSplit = trimLine.split(" , ");
             userPermissions = new ArrayList<>(Arrays.asList(permissionsSplit));
-            // TODO
-//            System.out.println("permissions = " + userPermissions);
         }
     }
 
@@ -193,10 +188,6 @@ public class JavaSerializationService implements SerializationService{
             // city
             // kharkiv
             userAttributes.put(citySplit[0], citySplit[1]);
-            // TODO
-//            System.out.println("attributes = " + userAttributes);
-//            System.out.println("attributes = " + userAttributes.get("country"));
-//            System.out.println("attributes = " + userAttributes.get("city"));
         }
     }
 
@@ -213,11 +204,7 @@ public class JavaSerializationService implements SerializationService{
             calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(splitTime[0]));
             calendar.set(Calendar.MINUTE, Integer.parseInt(splitTime[1]));
             calendar.set(Calendar.SECOND, Integer.parseInt(splitTime[2]));
-
             createdAt = calendar.getTime();
-
-            // TODO
-//            System.out.println("date = " + createdAt);
         }
     }
 
@@ -228,9 +215,14 @@ public class JavaSerializationService implements SerializationService{
         }
     }
 
-    public static void main(String[] args) {
-        File file = new File("User.properties");
-        new JavaSerializationService().deserialize(file);
-    }
-
+//    public static void main(String[] args) {
+//        File file = new File("User.properties");
+////        new JavaSerializationService().deserialize(file);
+//        new JavaSerializationService().serialize(
+//            new User(
+//                1L, "nickName"
+//            ),
+//            file
+//        );
+//    }
 }

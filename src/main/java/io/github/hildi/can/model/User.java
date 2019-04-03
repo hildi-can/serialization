@@ -1,10 +1,7 @@
 package io.github.hildi.can.model;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class User implements Serializable {
 
@@ -79,7 +76,6 @@ public class User implements Serializable {
         return Objects.equals(id, user.id) &&
             Objects.equals(nickName, user.nickName) &&
             Objects.equals(email, user.email) &&
-            Objects.equals(fullName, user.fullName) &&
             Objects.equals(permissions, user.permissions) &&
             Objects.equals(attributes, user.attributes) &&
             Objects.equals(createdAt, user.createdAt);
@@ -87,18 +83,19 @@ public class User implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nickName, email, fullName, permissions, attributes, createdAt);
+        return Objects.hash(id, nickName, email, permissions, attributes, createdAt);
     }
 
-    @Override
-    public String toString() {
-        return "id = " + id + "\n" +
-            "nickName = " + nickName + "\n" +
-            "email = " + email + "\n" +
-            "firstName = " + fullName.getFirstName() + "\n" +
-            "lastName = " + fullName.getLastName() + "\n" +
-            "permissions = " + permissions + "\n" +
-            "attributes = " + attributes + "\n" +
-            "createdAt = " + createdAt + "\n";
-    }
+//    @Override
+//    public String toString() {
+//        return "id = " + id + "\n" +
+//            "nickName = " + nickName + "\n" +
+//            "email = " + email + "\n" +
+//            "permissions = " + permissions + "\n" +
+//            "attributes = " + attributes + "\n" +
+//            "createdAt = " + createdAt + "\n" +
+//            fullName + "\n";
+////            "firstName = " + fullName.getFirstName() + "\n" +
+////            "lastName = " + fullName.getLastName() + "\n";
+//    }
 }
