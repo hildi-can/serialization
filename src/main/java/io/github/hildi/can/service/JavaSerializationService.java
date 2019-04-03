@@ -1,8 +1,5 @@
 package io.github.hildi.can.service;
 
-import io.github.hildi.can.exceptions.InvalidFileException;
-import io.github.hildi.can.exceptions.NotReadableFileException;
-import io.github.hildi.can.exceptions.NotWritableFileException;
 import io.github.hildi.can.exceptions.SerializationException;
 import io.github.hildi.can.model.FullName;
 import io.github.hildi.can.model.User;
@@ -13,13 +10,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
+import static io.github.hildi.can.asserts.AssertFile.*;
+import static io.github.hildi.can.asserts.AssertUser.assertParamNotNull;
+
 /**
  * Created by Serhii Hildi on 26.03.19.
  */
 public class JavaSerializationService implements SerializationService{
 
     private User user;
-    private FullName fullName;
     private long userId;
     private String userNickName;
     private String firstName;
@@ -35,7 +34,8 @@ public class JavaSerializationService implements SerializationService{
         assertFileExist(file);
         assertFileWritable(file);
         try (FileWriter writer = new FileWriter(file)) {
-            writer.write(setUserParametersToFile(user));
+            String param = setUserParametersToFile(user);
+            writer.write(param);
         } catch (IOException e) {
             throw new SerializationException("Failed to serialize data. " + file.getName(), e);
         }
@@ -47,7 +47,10 @@ public class JavaSerializationService implements SerializationService{
         assertFileReadable(file);
         assertFileExtensionIsCorrect(file);
         try (Scanner scanner = new Scanner(file)){
-            getAndAssignParametersFromFile(scanner);
+            do {
+                String line = scanner.nextLine();
+                getAndAssignParametersFromFile(line);
+            } while (scanner.hasNextLine());
             setUserParameters(userId, userNickName, userEmail, userPermissions, userAttributes, createdAt);
         } catch (FileNotFoundException e) {
             throw new SerializationException("Failed to deserialize data, reason: file " + file.getName() +
@@ -59,18 +62,11 @@ public class JavaSerializationService implements SerializationService{
     private String setUserParametersToFile(User user) {
         return "id = " + user.getId() + "\n" +
             "nickName = " + user.getNickName() + "\n" +
-//            "firstName = " + fullName.getFirstName() + "\n" +
-//            "lastName = " + fullName.getLastName() + "\n" +
+            "fullName = " + user.getFullName() + "\n" +
             "email = " + user.getEmail() + "\n" +
             "permissions = " + user.getPermissions() + "\n" +
             "attributes = " + user.getAttributes() + "\n" +
             "createdAt = " + user.getCreatedAt() + "\n";
-    }
-
-    private void getAndAssignParametersFromFile(Scanner scanner) {
-        while (scanner.hasNextLine()) {
-            getUserPropertiesFromFile(scanner);
-        }
     }
 
     private void setUserParameters(long userId, String userNickName, String userEmail,
@@ -92,7 +88,8 @@ public class JavaSerializationService implements SerializationService{
 
     private void setFullName(String firstName, String lastName) {
         if (firstName != null && lastName != null) {
-            fullName = new FullName(firstName, lastName);
+            FullName fullName = new FullName(firstName, lastName);
+            user.setFullName(fullName);
         }
     }
 
@@ -112,18 +109,18 @@ public class JavaSerializationService implements SerializationService{
         user.setCreatedAt(createdAt);
     }
 
-    private void getUserPropertiesFromFile(Scanner scanner) {
-        String[] line = scanner.nextLine().split(" = ");
-        String param = line[0].toLowerCase().trim();
+    private void getAndAssignParametersFromFile(String line) {
+        String[] lines = line.split(" = ");
+        String param = lines[0].toLowerCase().trim();
 
-        getUserId(param, line);
-        getUserNickName(param, line);
-        getUserFirstName(param, line);
-        getUserLastName(param, line);
-        getUserEmail(param, line);
-        getUserPermissions(param, line);
-        getUserAttributes(param, line);
-        getUserCreatedData(param, line);
+        getUserId(param, lines);
+        getUserNickName(param, lines);
+        getUserFirstName(param, lines);
+        getUserLastName(param, lines);
+        getUserEmail(param, lines);
+        getUserPermissions(param, lines);
+        getUserAttributes(param, lines);
+        getUserCreatedData(param, lines);
     }
 
     private void getUserId(String param, String[] line) {
@@ -196,44 +193,6 @@ public class JavaSerializationService implements SerializationService{
             calendar.set(Calendar.MINUTE, Integer.parseInt(splitTime[1]));
             calendar.set(Calendar.SECOND, Integer.parseInt(splitTime[2]));
             createdAt = calendar.getTime();
-        }
-    }
-
-    private static void assertFileExtensionIsCorrect(File file) {
-        String name = file.getName();
-        if (!name.endsWith(".properties")){
-            throw new InvalidFileException("Failed to serialize data, reason: invalid file extension " + file.getName());
-        }
-    }
-
-    private static void assertFileWritable(File file) {
-        if (!file.canWrite()) {
-            throw new NotWritableFileException("Failed to serialize, reason: " + file.getName() + " is not writable.");
-        }
-    }
-
-    private static void assertFileReadable(File file) {
-        if (!file.canRead()) {
-            throw new NotReadableFileException("Failed to deserialize, reason: " + file.getName() + " is not readable or doesn't exist.");
-        }
-    }
-
-    private static void assertParamNotNull(User user, File file) {
-        if (user == null) {
-            throw new IllegalArgumentException("Failed to serialize, reason: User is null.");
-        }
-        assertFileNotNull(file);
-    }
-
-    private static void assertFileNotNull(File file) {
-        if (file == null) {
-            throw new IllegalArgumentException("Failed to serialize, reason: File is null.");
-        }
-    }
-
-    private static void assertFileExist(File file) {
-        if (!file.exists()) {
-            throw new IllegalArgumentException("Failed to serialize, reason: file " + file.getName() + " doesn't exist.");
         }
     }
 }
