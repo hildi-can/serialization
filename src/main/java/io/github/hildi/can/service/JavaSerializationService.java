@@ -8,6 +8,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static io.github.hildi.can.asserts.AssertFile.*;
@@ -18,15 +21,14 @@ import static io.github.hildi.can.asserts.AssertUser.assertParamNotNull;
  */
 public class JavaSerializationService implements SerializationService{
 
-    private User user;
-    private long userId;
-    private String userNickName;
-    private String firstName;
-    private String lastName;
-    private String userEmail;
-    private Collection<String> userPermissions;
-    private Map<String, String> userAttributes;
-    private Date createdAt;
+    long userId;
+    String userNickName;
+    String userFirstName;
+    String userLastName;
+    String userEmail;
+    Collection<String> userPermissions;
+    Map<String, String> userAttributes;
+    Date createdAt;
 
     @Override
     public void serialize(User user, File file) {
@@ -46,16 +48,23 @@ public class JavaSerializationService implements SerializationService{
         assertFileNotNull(file);
         assertFileReadable(file);
         assertFileExtensionIsCorrect(file);
+
+        User user = null;
         try (Scanner scanner = new Scanner(file)){
             do {
                 String line = scanner.nextLine();
                 getAndAssignParametersFromFile(line);
             } while (scanner.hasNextLine());
-            setUserParameters(userId, userNickName, userEmail, userPermissions, userAttributes, createdAt);
+
+            if (userId != 0 && userNickName != null) {
+                user = new User(userId, userNickName);
+                setUserParameters(user, userEmail, userPermissions, userAttributes, createdAt);
+            }
         } catch (FileNotFoundException e) {
             throw new SerializationException("Failed to deserialize data, reason: file " + file.getName() +
                 " is not found. ", e);
         }
+        assertParamNotNull(user, file);
         return user;
     }
 
@@ -69,101 +78,91 @@ public class JavaSerializationService implements SerializationService{
             "createdAt = " + user.getCreatedAt() + "\n";
     }
 
-    private void setUserParameters(long userId, String userNickName, String userEmail,
+    private void setUserParameters(User user, String userEmail,
                                    Collection<String> userPermissions,
                                    Map<String, String> userAttributes, Date createdAt) {
-        setIdAndNickNameParameters(userId, userNickName);
-        setFullName(firstName, lastName);
-        setUserEmail(userEmail);
-        setUserPermissions(userPermissions);
-        setUserAttributes(userAttributes);
-        setUserCreatedData(createdAt);
+        setFullName(user, userFirstName, userLastName);
+        setUserEmail(user, userEmail);
+        setUserPermissions(user, userPermissions);
+        setUserAttributes(user, userAttributes);
+        setUserCreatedData(user, createdAt);
     }
 
-    private void setIdAndNickNameParameters(long userId, String userNickName) {
-        if (userId != 0 && userNickName != null) {
-            user = new User(userId, userNickName);
-        }
+    void setFullName(User user, String firstName, String lastName) {
+        FullName fullName = new FullName(firstName, lastName);
+        user.setFullName(fullName);
     }
 
-    private void setFullName(String firstName, String lastName) {
-        if (firstName != null && lastName != null) {
-            FullName fullName = new FullName(firstName, lastName);
-            user.setFullName(fullName);
-        }
-    }
-
-    private void setUserEmail(String userEmail) {
+    void setUserEmail(User user, String userEmail) {
         user.setEmail(userEmail);
     }
 
-    private void setUserPermissions(Collection<String> userPermissions) {
+    void setUserPermissions(User user, Collection<String> userPermissions) {
         user.setPermissions(userPermissions);
     }
 
-    private void setUserAttributes(Map<String, String> userAttributes) {
+    void setUserAttributes(User user, Map<String, String> userAttributes) {
         user.setAttributes(userAttributes);
     }
 
-    private void setUserCreatedData(Date createdAt) {
+    private void setUserCreatedData(User user, Date createdAt) {
         user.setCreatedAt(createdAt);
     }
 
     private void getAndAssignParametersFromFile(String line) {
-        String[] lines = line.split(" = ");
-        String param = lines[0].toLowerCase().trim();
+        String[] partsOfLine = line.split(" = ");
+        String param = partsOfLine[0].toLowerCase().trim();
 
-        getUserId(param, lines);
-        getUserNickName(param, lines);
-        getUserFirstName(param, lines);
-        getUserLastName(param, lines);
-        getUserEmail(param, lines);
-        getUserPermissions(param, lines);
-        getUserAttributes(param, lines);
-        getUserCreatedData(param, lines);
+        getUserId(param, partsOfLine);
+        getUserNickName(param, partsOfLine);
+        getUserFirstName(param, partsOfLine);
+        getUserLastName(param, partsOfLine);
+        getUserEmail(param, partsOfLine);
+        getUserPermissions(param, partsOfLine);
+        getUserAttributes(param, partsOfLine);
+        getUserCreatedData(param, partsOfLine);
     }
 
-    private void getUserId(String param, String[] line) {
+    void getUserId(String param, String[] line) {
         if (param.equals("id".toLowerCase().trim())) {
             userId = (long) Integer.parseInt(line[1]);
         }
     }
 
-    private void getUserNickName(String param, String[] line) {
+    void getUserNickName(String param, String[] line) {
         if (param.equals("nickName".toLowerCase().trim())) {
             userNickName = line[1];
         }
     }
 
-    private void getUserFirstName(String param, String[] line) {
-        if (param.equals("firstName".toLowerCase().trim())) {
-            firstName = line[1].trim();
+    void getUserFirstName(String param, String[] line) {
+        if (param.equals("userFirstName".toLowerCase().trim())) {
+            userFirstName = line[1].trim();
         }
     }
 
-    private void getUserLastName(String param, String[] line) {
-        if (param.equals("lastName".toLowerCase().trim())) {
-            lastName = line[1].trim();
+    void getUserLastName(String param, String[] line) {
+        if (param.equals("userLastName".toLowerCase().trim())) {
+            userLastName = line[1].trim();
         }
     }
 
-    private void getUserEmail(String param, String[] line) {
+    void getUserEmail(String param, String[] line) {
         if (param.equals("email".toLowerCase().trim())) {
             userEmail = line[1].toLowerCase().trim();
         }
     }
 
-    private void getUserPermissions(String param, String[] line) {
+    void getUserPermissions(String param, String[] line) {
         if (param.equals("permissions".toLowerCase().trim())) {
-            String trimLine = line[1].trim();
-            String[] permissionsSplit = trimLine.split(" , ");
-            userPermissions = new ArrayList<>(Arrays.asList(permissionsSplit));
+            String[] trimLine = line[1].trim().split(", ");
+            userPermissions = new ArrayList<>(Arrays.asList(trimLine));
         }
     }
 
-    private void getUserAttributes(String param, String[] line) {
+    void getUserAttributes(String param, String[] line) {
         if (param.equals("attributes".toLowerCase().trim())) {
-            userAttributes = new LinkedHashMap<>();
+            Map<String, String> attributes = new LinkedHashMap<>();
             // country: ukraine; city: kharkiv
             String[] attributesSplit = line[1].trim().split("; ");
             // country: ukraine
@@ -172,14 +171,15 @@ public class JavaSerializationService implements SerializationService{
             String[] citySplit = attributesSplit[1].trim().split(": ");
             // country
             // ukraine
-            userAttributes.put(countrySplit[0], countrySplit[1]);
+            attributes.put(countrySplit[0], countrySplit[1]);
             // city
             // kharkiv
-            userAttributes.put(citySplit[0], citySplit[1]);
+            attributes.put(citySplit[0], citySplit[1]);
+            userAttributes = attributes;
         }
     }
 
-    private void getUserCreatedData(String param, String[] line) {
+    void getUserCreatedData(String param, String[] line) {
         if (param.equals("createdAt".toLowerCase().trim())) {
             String[] split = line[1].split("T");
             String[] splitDate = split[0].split("-");
@@ -193,6 +193,12 @@ public class JavaSerializationService implements SerializationService{
             calendar.set(Calendar.MINUTE, Integer.parseInt(splitTime[1]));
             calendar.set(Calendar.SECOND, Integer.parseInt(splitTime[2]));
             createdAt = calendar.getTime();
+
+            LocalDate date = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+            String text = date.format(formatter);
+            LocalDate parsedDate = LocalDate.parse(text, formatter);
+            createdAt = Date.from(Instant.from(parsedDate));
         }
     }
 }
