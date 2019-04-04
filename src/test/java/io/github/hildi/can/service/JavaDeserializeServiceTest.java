@@ -55,7 +55,7 @@ class JavaDeserializeServiceTest {
     }
 
     @Test
-    void ShouldReturnEqualsWhenParameterFullNameFromFileIsSuccessfullyAssigned() {
+    void shouldReturnEqualsWhenFullNameParameterFromFileIsSuccessfullyAssigned() {
         String firstName = "Serhii";
         String lastName = "Solohub";
         service.setFullName(user, firstName, lastName);
@@ -67,7 +67,7 @@ class JavaDeserializeServiceTest {
     }
 
     @Test
-    void ShouldReturnEqualsWhenParameterEmailFromFileIsSuccessfullyAssigned() {
+    void shouldReturnEqualsWhenEmailParameterFromFileIsSuccessfullyAssigned() {
         service.setUserEmail(user,"sergei.sologub@gmail.com");
         String result = user.getEmail();
         String expected = "sergei.sologub@gmail.com";
@@ -77,7 +77,7 @@ class JavaDeserializeServiceTest {
 
 
     @Test
-    void ShouldReturnEqualsWhenPermissionListFromFileIsSuccessfullyAssigned() {
+    void shouldReturnEqualsWhenPermissionsFromFileIsSuccessfullyAssigned() {
         ArrayList<String> list = new ArrayList<>();
         list.add("admin");
         list.add("user");
@@ -94,7 +94,7 @@ class JavaDeserializeServiceTest {
     }
 
     @Test
-    void ShouldReturnEqualsWhenAttributesFromFileIsSuccessfullyAssigned() {
+    void shouldReturnEqualsWhenAttributesFromFileIsSuccessfullyAssigned() {
         Map<String, String> attributes = new LinkedHashMap<>();
         attributes.put("country", "ukraine");
         attributes.put("city", "kharkiv");
