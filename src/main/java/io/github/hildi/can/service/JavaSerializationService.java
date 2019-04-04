@@ -8,27 +8,19 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static io.github.hildi.can.asserts.AssertFile.*;
 import static io.github.hildi.can.asserts.AssertUser.assertParamNotNull;
+import static io.github.hildi.can.asserts.AssertUser.assertUserNotNull;
 
 /**
  * Created by Serhii Hildi on 26.03.19.
  */
 public class JavaSerializationService implements SerializationService{
-
-    long userId;
-    String userNickName;
-    String userFirstName;
-    String userLastName;
-    String userEmail;
-    Collection<String> userPermissions;
-    Map<String, String> userAttributes;
-    Date createdAt;
 
     @Override
     public void serialize(User user, File file) {
@@ -43,31 +35,6 @@ public class JavaSerializationService implements SerializationService{
         }
     }
 
-    @Override
-    public User deserialize(File file) {
-        assertFileNotNull(file);
-        assertFileReadable(file);
-        assertFileExtensionIsCorrect(file);
-
-        User user = null;
-        try (Scanner scanner = new Scanner(file)){
-            do {
-                String line = scanner.nextLine();
-                getAndAssignParametersFromFile(line);
-            } while (scanner.hasNextLine());
-
-            if (userId != 0 && userNickName != null) {
-                user = new User(userId, userNickName);
-                setUserParameters(user, userEmail, userPermissions, userAttributes, createdAt);
-            }
-        } catch (FileNotFoundException e) {
-            throw new SerializationException("Failed to deserialize data, reason: file " + file.getName() +
-                " is not found. ", e);
-        }
-        assertParamNotNull(user, file);
-        return user;
-    }
-
     private String setUserParametersToFile(User user) {
         return "id = " + user.getId() + "\n" +
             "nickName = " + user.getNickName() + "\n" +
@@ -78,14 +45,75 @@ public class JavaSerializationService implements SerializationService{
             "createdAt = " + user.getCreatedAt() + "\n";
     }
 
-    private void setUserParameters(User user, String userEmail,
-                                   Collection<String> userPermissions,
-                                   Map<String, String> userAttributes, Date createdAt) {
+    @Override
+    public User deserialize(File file) {
+        assertFileNotNull(file);
+        assertFileReadable(file);
+        assertFileExtensionIsCorrect(file);
+        return getAndAssignParametersFromFile(file);
+    }
+
+    User getAndAssignParametersFromFile(File file) {
+
+        long userId = 0;
+        String userNickName = null;
+        String userFirstName = null;
+        String userLastName = null;
+        String userEmail = null;
+        Collection<String> userPermissions = null;
+        Map<String, String> userAttributes = null;
+        Date userCreateDate = null;
+
+        try (Scanner scanner = new Scanner(file)){
+            do {
+                String line = scanner.nextLine();
+                String[] divideLine = dividedLineIntoTwoParts(line);
+                String userParameter = getLeftSideOfLine(divideLine);
+
+                userId = getUserId(userId, userParameter, divideLine);
+                userNickName = getUserNickName(userNickName, userParameter, divideLine);
+                userFirstName = getUserFirstName(userFirstName, userParameter, divideLine);
+                userLastName = getUserLastName(userLastName, userParameter, divideLine);
+                userEmail = getUserEmail(userEmail, userParameter, divideLine);
+                userPermissions = getUserPermissions(userPermissions, userParameter, divideLine);
+                userAttributes = getUserAttributes(userAttributes, userParameter, divideLine);
+                userCreateDate = getUserCreatedData(userCreateDate, userParameter, divideLine);
+            } while (scanner.hasNextLine());
+        } catch (FileNotFoundException e) {
+            throw new SerializationException("Failed to deserialize data, reason: file " + file.getName() +
+                " is not found. ", e);
+        }
+
+        assertMainParametersIsAvailable(file, userId, userNickName);
+        User user = new User(userId, userNickName);
+        setAllParametersForNewUser(user, userFirstName, userLastName, userEmail,
+            userPermissions, userAttributes, userCreateDate);
+        assertUserNotNull(user);
+        return user;
+    }
+
+    void assertMainParametersIsAvailable(File file, long userId, String userNickName) {
+        if (userId == 0 || userNickName == null) {
+            throw new IllegalArgumentException("Failed to deserialize data, reason: 'id' and 'nickName' " +
+                "parameters don't found at file " + file.getName());
+        }
+    }
+
+    private void setAllParametersForNewUser(User user, String userFirstName, String userLastName, String userEmail, Collection<String> userPermissions, Map<String, String> userAttributes, Date userCreateDate) {
         setFullName(user, userFirstName, userLastName);
         setUserEmail(user, userEmail);
         setUserPermissions(user, userPermissions);
         setUserAttributes(user, userAttributes);
-        setUserCreatedData(user, createdAt);
+        setUserCreatedData(user, userCreateDate);
+
+    }
+
+    private String[] dividedLineIntoTwoParts(String line) {
+        return line.split(" = ");
+    }
+
+    private String getLeftSideOfLine(String[] lines) {
+        return lines[0].toLowerCase().trim();
     }
 
     void setFullName(User user, String firstName, String lastName) {
@@ -109,96 +137,67 @@ public class JavaSerializationService implements SerializationService{
         user.setCreatedAt(createdAt);
     }
 
-    private void getAndAssignParametersFromFile(String line) {
-        String[] partsOfLine = line.split(" = ");
-        String param = partsOfLine[0].toLowerCase().trim();
-
-        getUserId(param, partsOfLine);
-        getUserNickName(param, partsOfLine);
-        getUserFirstName(param, partsOfLine);
-        getUserLastName(param, partsOfLine);
-        getUserEmail(param, partsOfLine);
-        getUserPermissions(param, partsOfLine);
-        getUserAttributes(param, partsOfLine);
-        getUserCreatedData(param, partsOfLine);
-    }
-
-    void getUserId(String param, String[] line) {
+    private long getUserId(long userId, String param, String[] line) {
         if (param.equals("id".toLowerCase().trim())) {
             userId = (long) Integer.parseInt(line[1]);
         }
+        return userId;
     }
 
-    void getUserNickName(String param, String[] line) {
+    private String getUserNickName(String userNickName, String param, String[] line) {
         if (param.equals("nickName".toLowerCase().trim())) {
             userNickName = line[1];
         }
+        return userNickName;
     }
 
-    void getUserFirstName(String param, String[] line) {
-        if (param.equals("userFirstName".toLowerCase().trim())) {
+    private String getUserFirstName(String userFirstName, String param, String[] line) {
+        if (param.equals("firstName".toLowerCase().trim())) {
             userFirstName = line[1].trim();
         }
+        return userFirstName;
     }
 
-    void getUserLastName(String param, String[] line) {
-        if (param.equals("userLastName".toLowerCase().trim())) {
+    private String getUserLastName(String userLastName, String param, String[] line) {
+        if (param.equals("lastName".toLowerCase().trim())) {
             userLastName = line[1].trim();
         }
+        return userLastName;
     }
 
-    void getUserEmail(String param, String[] line) {
+    private String getUserEmail(String userEmail, String param, String[] line) {
         if (param.equals("email".toLowerCase().trim())) {
             userEmail = line[1].toLowerCase().trim();
         }
+        return userEmail;
     }
 
-    void getUserPermissions(String param, String[] line) {
+    private Collection<String> getUserPermissions(Collection<String> userPermissions, String param, String[] line) {
         if (param.equals("permissions".toLowerCase().trim())) {
-            String[] trimLine = line[1].trim().split(", ");
-            userPermissions = new ArrayList<>(Arrays.asList(trimLine));
+            String[] permissions = line[1].trim().split(", ");
+            userPermissions = new ArrayList<>(Arrays.asList(permissions));
         }
+        return userPermissions;
     }
 
-    void getUserAttributes(String param, String[] line) {
+    private Map<String, String> getUserAttributes(Map<String, String> userAttributes, String param, String[] line) {
         if (param.equals("attributes".toLowerCase().trim())) {
-            Map<String, String> attributes = new LinkedHashMap<>();
-            // country: ukraine; city: kharkiv
-            String[] attributesSplit = line[1].trim().split("; ");
-            // country: ukraine
-            String[] countrySplit = attributesSplit[0].trim().split(": ");
-            // city: kharkiv
-            String[] citySplit = attributesSplit[1].trim().split(": ");
-            // country
-            // ukraine
-            attributes.put(countrySplit[0], countrySplit[1]);
-            // city
-            // kharkiv
-            attributes.put(citySplit[0], citySplit[1]);
-            userAttributes = attributes;
+            userAttributes = new LinkedHashMap<>();
+            String[] attributes = line[1].trim().split("; ");
+            String[] country = attributes[0].trim().split(": ");
+            String[] city = attributes[1].trim().split(": ");
+            userAttributes.put(country[0], country[1]);
+            userAttributes.put(city[0], city[1]);
         }
+        return userAttributes;
     }
 
-    void getUserCreatedData(String param, String[] line) {
+    private Date getUserCreatedData(Date userCreateDate, String param, String[] line) {
         if (param.equals("createdAt".toLowerCase().trim())) {
-            String[] split = line[1].split("T");
-            String[] splitDate = split[0].split("-");
-            String[] splitTime = split[1].split(":");
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.YEAR, Integer.parseInt(splitDate[0]));
-            calendar.set(Calendar.MONTH, Integer.parseInt(splitDate[1]) - 1);
-            calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(splitDate[2]));
-            calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(splitTime[0]));
-            calendar.set(Calendar.MINUTE, Integer.parseInt(splitTime[1]));
-            calendar.set(Calendar.SECOND, Integer.parseInt(splitTime[2]));
-            createdAt = calendar.getTime();
-
-            LocalDate date = LocalDate.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-            String text = date.format(formatter);
-            LocalDate parsedDate = LocalDate.parse(text, formatter);
-            createdAt = Date.from(Instant.from(parsedDate));
+            LocalDateTime localDateTime = LocalDateTime.parse(line[1], formatter);
+            userCreateDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
         }
+        return userCreateDate;
     }
 }

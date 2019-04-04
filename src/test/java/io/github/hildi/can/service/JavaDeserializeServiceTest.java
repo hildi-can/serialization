@@ -1,14 +1,23 @@
 package io.github.hildi.can.service;
 
+import io.github.hildi.can.asserts.AssertUser;
 import io.github.hildi.can.exceptions.InvalidFileException;
 import io.github.hildi.can.exceptions.NotReadableFileException;
 import io.github.hildi.can.model.FullName;
 import io.github.hildi.can.model.User;
-import jdk.nashorn.internal.ir.annotations.Ignore;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,14 +31,27 @@ import static org.mockito.Mockito.when;
 class JavaDeserializeServiceTest {
 
     private JavaSerializationService service;
-    private File file;
     private User user;
+    private File file;
+    private File mockFile;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         service = new JavaSerializationService();
         user = new User(1L, "Valera");
-        file = mock(File.class);
+        mockFile = mock(File.class);
+
+        List<String> lines = Collections.singletonList("id = 1\n" +
+            "nickName = solo-yolo\n" +
+            "email = sergei.sologub@gmail.com\n" +
+            "firstName = Serhii\n" +
+            "lastName = Solohub\n" +
+            "permissions = admin, user\n" +
+            "attributes = country: ukraine; city: kharkiv\n" +
+            "createdAt = 2011-12-03T10:15:30");
+        Path realFile = Paths.get("user.properties");
+        Files.write(realFile, lines, Charset.forName("UTF-8"));
+        file = new File(String.valueOf(realFile));
     }
 
     @Test
@@ -45,13 +67,14 @@ class JavaDeserializeServiceTest {
     }
 
     @Test
-    void ShouldReturnEqualsWhenParameterEmailFileIsSuccessfullyAssigned() {
+    void ShouldReturnEqualsWhenParameterEmailFromFileIsSuccessfullyAssigned() {
         service.setUserEmail(user,"sergei.sologub@gmail.com");
         String result = user.getEmail();
         String expected = "sergei.sologub@gmail.com";
 
         assertEquals(expected, result);
     }
+
 
     @Test
     void ShouldReturnEqualsWhenPermissionListFromFileIsSuccessfullyAssigned() {
@@ -89,127 +112,108 @@ class JavaDeserializeServiceTest {
 
     @Test
     void shouldAssignCorrectIdParameterFromFile() {
-        String lineFromFile = "id = 1";
-        String[] partsOfLine = lineFromFile.split(" = ");
-        String param = partsOfLine[0].toLowerCase().trim();
+        Long res = service.getAndAssignParametersFromFile(file).getId();
+        assertEquals(1, res);
+    }
 
-        service.getUserId(param, partsOfLine);
-        long result = service.userId;
+    @Test
+    void shouldAssignCorrectCreatedDateParameterFromFile() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        LocalDateTime localDateTime = LocalDateTime.parse("2011-12-03T10:15:30", formatter);
 
-        assertEquals(1, result);
+        Date exp = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
+        Date res = service.getAndAssignParametersFromFile(file).getCreatedAt();
+
+        assertEquals(exp, res);
     }
 
     @Test
     void shouldAssignCorrectNickNameParameterFromFile() {
-        String lineFromFile = "nickName = solo.yang";
-        String[] partsOfLine = lineFromFile.split(" = ");
-        String param = partsOfLine[0].toLowerCase().trim();
-
-        service.getUserNickName(param, partsOfLine);
-        String result = service.userNickName;
-
-        assertEquals("solo.yang", result);
+        String result = service.getAndAssignParametersFromFile(file).getNickName();
+        assertEquals("solo-yolo", result);
     }
 
     @Test
-    void shouldAssignCorrectFirstNameParameterFromFile() {
-        String lineFromFile = "userFirstName = Serhii";
-
-        String[] partsOfLine = lineFromFile.split(" = ");
-        String param = partsOfLine[0].toLowerCase().trim();
-
-        service.getUserFirstName(param, partsOfLine);
-        String result = service.userFirstName;
-
-        assertEquals("Serhii", result);
-    }
-
-    @Test
-    void shouldAssignCorrectLastNameParameterFromFile() {
-        String lineFromFile = "userLastName = Solohub";
-
-        String[] partsOfLine = lineFromFile.split(" = ");
-        String param = partsOfLine[0].toLowerCase().trim();
-
-        service.getUserLastName(param, partsOfLine);
-        String result = service.userLastName;
-
-        assertEquals("Solohub", result);
+    void shouldAssignCorrectFullNameParameterFromFile() {
+        FullName result = service.getAndAssignParametersFromFile(file).getFullName();
+        FullName fullName = new FullName("Serhii", "Solohub");
+        assertEquals(fullName, result);
     }
 
     @Test
     void shouldAssignCorrectEmailParameterFromFile() {
-        String lineFromFile = "email = sergei@gmail.com";
-
-        String[] partsOfLine = lineFromFile.split(" = ");
-        String param = partsOfLine[0].toLowerCase().trim();
-
-        service.getUserEmail(param, partsOfLine);
-        String result = service.userEmail;
-
-        assertEquals("sergei@gmail.com", result);
+        String result = service.getAndAssignParametersFromFile(file).getEmail();
+        assertEquals("sergei.sologub@gmail.com", result);
     }
 
     @Test
     void shouldAssignCorrectPermissionsParameterFromFile() {
-        String lineFromFile = "permissions = admin, user";
-        String[] partsOfLine = lineFromFile.split(" = ");
-        String param = partsOfLine[0].toLowerCase().trim();
+        ArrayList<String> permissionsList = new ArrayList<>();
+        permissionsList.add("admin");
+        permissionsList.add("user");
 
-        ArrayList<String> list = new ArrayList<>(2);
-        list.add("admin");
-        list.add("user");
+        Collection<String> result = service.getAndAssignParametersFromFile(file).getPermissions();
 
-        service.getUserPermissions(param, partsOfLine);
-        Collection<String> result = service.userPermissions;
-
-        assertEquals(list, result);
+        assertEquals(permissionsList, result);
     }
 
     @Test
     void shouldAssignCorrectAttributesFromFile() {
-        String lineFromFile = "attributes = country: ukraine; city: kharkiv";
-        String[] partsOfLine = lineFromFile.split(" = ");
-        String param = partsOfLine[0].toLowerCase().trim();
-
         Map<String, String> attributes = new LinkedHashMap<>();
         attributes.put("country", "ukraine");
         attributes.put("city", "kharkiv");
 
-        service.getUserAttributes(param, partsOfLine);
-        Map<String, String> result = service.userAttributes;
+        Map<String, String> result = service.getAndAssignParametersFromFile(file).getAttributes();
 
         assertEquals(attributes, result);
     }
 
-    @Ignore
-    void shouldAssignCorrectCreateDateFromFile() {
-        String lineFromFile = "createdAt = 2011-12-03T10:15:30";
-        String[] partsOfLine = lineFromFile.split(" = ");
-        String param = partsOfLine[0].toLowerCase().trim();
-
-        // TODO
-        service.getUserCreatedData(param, partsOfLine);
-//        assertEquals(new Date(), ...);
-    }
-
     @Test
     void shouldThrowInvalidFileExceptionWhenFileExtensionIsNotCorrect() {
-        when(file.exists()).thenReturn(true);
-        when(file.canRead()).thenReturn(true);
-        when(file.getName()).thenReturn("user.property");
+        when(mockFile.exists()).thenReturn(true);
+        when(mockFile.canRead()).thenReturn(true);
+        when(mockFile.getName()).thenReturn("user.property");
 
         assertThrows(InvalidFileException.class, () -> {
-            service.deserialize(file);
+            service.deserialize(mockFile);
         });
     }
 
     @Test
     void shouldThrowNotReadableFileExceptionWhenFileIsNotReadable() {
-        when(file.canRead()).thenReturn(false);
+        when(mockFile.canRead()).thenReturn(false);
 
         assertThrows(NotReadableFileException.class, () -> {
-            service.deserialize(file);
+            service.deserialize(mockFile);
+        });
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenIdParameterNotFoundAtFile() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.assertMainParametersIsAvailable(mockFile, 0, "sdas");
+        });
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenNickNameParameterNotFoundAtFile() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.assertMainParametersIsAvailable(mockFile, 1L, null);
+        });
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenIdAndNickNameParameterNotFoundAtFile() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.assertMainParametersIsAvailable(mockFile, 0, null);
+        });
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenUserIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            AssertUser.assertParamNotNull(null, mockFile);
         });
     }
 
@@ -218,5 +222,13 @@ class JavaDeserializeServiceTest {
         assertThrows(IllegalArgumentException.class, () -> {
             service.deserialize(null);
         });
+    }
+
+    @AfterEach
+    void tearDown() {
+        file.delete();
+        file = null;
+        service = null;
+        user = null;
     }
 }

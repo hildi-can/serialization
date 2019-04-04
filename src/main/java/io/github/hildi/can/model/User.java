@@ -79,6 +79,7 @@ public class User implements Serializable {
         return Objects.equals(id, user.id) &&
             Objects.equals(nickName, user.nickName) &&
             Objects.equals(email, user.email) &&
+            Objects.equals(fullName, user.fullName) &&
             Objects.equals(permissions, user.permissions) &&
             Objects.equals(attributes, user.attributes) &&
             Objects.equals(createdAt, user.createdAt);
@@ -86,6 +87,6 @@ public class User implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nickName, email, permissions, attributes, createdAt);
+        return Objects.hash(id, nickName, email, fullName, permissions, attributes, createdAt);
     }
 }

@@ -16,4 +16,9 @@ public class AssertUser {
         }
         assertFileNotNull(file);
     }
+    public static void assertUserNotNull(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("Failed to serialize, reason: User is null.");
+        }
+    }
 }
