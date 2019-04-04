@@ -23,6 +23,15 @@ public class User implements Serializable {
         this.nickName = nickName;
     }
 
+    public User(Long id, String nickName, String email, FullName fullName, Collection<String> permissions, Map<String, String> attributes) {
+        this.id = id;
+        this.nickName = nickName;
+        this.email = email;
+        this.fullName = fullName;
+        this.permissions = permissions;
+        this.attributes = attributes;
+    }
+
     public Long getId() {
         return id;
     }

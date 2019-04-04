@@ -28,21 +28,23 @@ public class JavaSerializationService implements SerializationService{
         assertFileExist(file);
         assertFileWritable(file);
         try (FileWriter writer = new FileWriter(file)) {
-            String param = setUserParametersToFile(user);
-            writer.write(param);
+            String parameters = setUserParametersToFile(user);
+            writer.write(parameters);
         } catch (IOException e) {
             throw new SerializationException("Failed to serialize data. " + file.getName(), e);
         }
     }
 
     private String setUserParametersToFile(User user) {
+        String dateNow = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
         return "id = " + user.getId() + "\n" +
             "nickName = " + user.getNickName() + "\n" +
-            "fullName = " + user.getFullName() + "\n" +
+            "firstName = " + user.getFullName().getFirstName() + "\n" +
+            "lastName = " + user.getFullName().getLastName() + "\n" +
             "email = " + user.getEmail() + "\n" +
             "permissions = " + user.getPermissions() + "\n" +
             "attributes = " + user.getAttributes() + "\n" +
-            "createdAt = " + user.getCreatedAt() + "\n";
+            "createdAt = " + dateNow + "\n";
     }
 
     @Override
